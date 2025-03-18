@@ -1,0 +1,70 @@
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+public class VigenereCipher implements Cipher {
+
+    @Override
+    public String encrypt(String message_filename, String key_filename) {
+        String message = readFileContent(message_filename);
+        String key = cleanKey(readFileContent(key_filename));
+
+        StringBuilder encrypted = new StringBuilder();
+        int keyIndex = 0;
+
+        for (int i = 0; i < message.length(); i++) {
+            char msgChar = message.charAt(i);
+
+            if (Character.isLetter(msgChar)) {
+                char keyChar = key.charAt(keyIndex % key.length());
+                int shift = (Character.toUpperCase(msgChar) - 'A') + (keyChar - 'A');
+                char encryptedChar = (char) ('A' + (shift % 26));
+                encrypted.append(encryptedChar);
+                //keyIndex++; // Increment only for alphabetic characters
+            } else {
+                encrypted.append(msgChar);
+            }
+            keyIndex++;
+        }
+
+        return encrypted.toString();
+    }
+
+    @Override
+    public String decrypt(String message_filename, String key_filename) {
+        String message = readFileContent(message_filename);
+        String key = cleanKey(readFileContent(key_filename));
+
+        StringBuilder decrypted = new StringBuilder();
+        int keyIndex = 0;
+
+        for (int i = 0; i < message.length(); i++) {
+            char msgChar = message.charAt(i);
+
+            if (Character.isLetter(msgChar)) {
+                char keyChar = key.charAt(keyIndex % key.length());
+                int shift = (Character.toUpperCase(msgChar) - 'A') - (keyChar - 'A') + 26;
+                char decryptedChar = (char) ('A' + (shift % 26));
+                decrypted.append(decryptedChar);
+                //keyIndex++; // Increment only for alphabetic characters
+            } else {
+                decrypted.append(msgChar);
+            }
+            keyIndex++;
+        }
+
+        return decrypted.toString();
+    }
+
+    private String readFileContent(String filename) {
+        try {
+            return new String(Files.readAllBytes(Paths.get(filename)));
+        } catch (IOException e) {
+            return "";
+        }
+    }
+
+    private String cleanKey(String key) {
+        return key.replaceAll("[^A-Za-z]", "").toUpperCase();
+    }
+}
